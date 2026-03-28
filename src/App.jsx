@@ -7,14 +7,17 @@ import { Ship } from './entities/Ship';
 import { Connection } from './multiplayer/connection';
 import { lerp, lerpAngle } from './multiplayer/protocol';
 
-const ShipPreview = ({ typeId }) => {
+const ShipPreview = ({ typeId, small }) => {
+  const w = small ? 100 : 160;
+  const h = small ? 60 : 100;
+  const scale = small ? 1.6 : 2.5;
   const ref = useCallback((canvas) => {
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    Ship.drawPreview(ctx, canvas.width / 2, canvas.height / 2, SHIP_TYPES[typeId]);
-  }, [typeId]);
-  return <canvas ref={ref} width={160} height={100} className="mb-4" />;
+    Ship.drawPreview(ctx, canvas.width / 2, canvas.height / 2, SHIP_TYPES[typeId], scale);
+  }, [typeId, scale]);
+  return <canvas ref={ref} width={w} height={h} className="mb-2 md:mb-4" />;
 };
 
 const App = () => {
@@ -580,16 +583,17 @@ const App = () => {
           <div className="min-h-full flex flex-col items-center justify-center p-6 pb-16 text-center">
             <h1 className="text-4xl md:text-5xl font-black italic mb-1 text-amber-500 uppercase tracking-tighter">Pirate Captain</h1>
             <p className="text-base md:text-xl opacity-70 mb-6 md:mb-8">בחר ספינה וצא לים הפתוח</p>
-            <div className="flex gap-4 md:gap-8 flex-wrap justify-center mb-8 md:mb-10">
+            <div className="flex gap-3 md:gap-8 justify-center mb-8 md:mb-10">
               {Object.entries(SHIP_TYPES).map(([id, ship]) => (
-                <button key={id} onClick={() => startSinglePlayer(id)} className="w-40 md:w-52 p-4 md:p-6 bg-white/5 border-2 border-white/20 rounded-2xl md:rounded-3xl hover:bg-white/10 hover:border-amber-500 transition-all active:scale-95 flex flex-col items-center">
-                  <ShipPreview typeId={id} />
-                  <div className="text-lg md:text-2xl font-bold mb-2 md:mb-3 text-amber-100">{ship.name}</div>
-                  <div className="text-xs md:text-sm opacity-60 mb-4 md:mb-6 text-right space-y-1">
+                <button key={id} onClick={() => startSinglePlayer(id)} className="w-[42%] max-w-52 p-3 md:p-6 bg-white/5 border-2 border-white/20 rounded-2xl md:rounded-3xl hover:bg-white/10 hover:border-amber-500 transition-all active:scale-95 flex flex-col items-center">
+                  <div className="hidden md:block"><ShipPreview typeId={id} /></div>
+                  <div className="md:hidden"><ShipPreview typeId={id} small /></div>
+                  <div className="text-base md:text-2xl font-bold mb-1 md:mb-3 text-amber-100">{ship.name}</div>
+                  <div className="text-[10px] md:text-sm opacity-60 mb-3 md:mb-6 text-right space-y-0.5 md:space-y-1">
                     <div>{ship.cannons === 1 ? 'תותח בודד' : 'זוג תותחים'} &bull;</div>
                     <div>{ship.health} חיים &bull;</div>
                   </div>
-                  <div className="bg-amber-600 px-6 md:px-10 py-2 md:py-3 rounded-full font-black uppercase text-xs md:text-sm shadow-lg">הפלג</div>
+                  <div className="bg-amber-600 px-5 md:px-10 py-2 md:py-3 rounded-full font-black uppercase text-[10px] md:text-sm shadow-lg">הפלג</div>
                 </button>
               ))}
             </div>
