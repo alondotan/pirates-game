@@ -576,55 +576,60 @@ const App = () => {
       <canvas ref={canvasRef} className="block w-full h-full" />
 
       {gameState === 'menu' && (
-        <div className="absolute inset-0 z-[200] bg-slate-900/95 flex flex-col items-center justify-center p-6 text-center text-white backdrop-blur-md">
-          <h1 className="text-5xl font-black italic mb-2 text-amber-500 uppercase tracking-tighter">Pirate Captain</h1>
-          <p className="text-xl opacity-70 mb-8">בחר ספינה וצא לים הפתוח</p>
-          <div className="flex gap-8 flex-wrap justify-center mb-10">
-            {Object.entries(SHIP_TYPES).map(([id, ship]) => (
-              <button key={id} onClick={() => startSinglePlayer(id)} className="w-52 p-6 bg-white/5 border-2 border-white/20 rounded-3xl hover:bg-white/10 hover:border-amber-500 transition-all active:scale-95 flex flex-col items-center">
-                <ShipPreview typeId={id} />
-                <div className="text-2xl font-bold mb-3 text-amber-100">{ship.name}</div>
-                <div className="text-sm opacity-60 mb-6 text-right space-y-1">
-                  <div>{ship.cannons === 1 ? 'תותח בודד' : 'זוג תותחים'} &bull;</div>
-                  <div>{ship.health} חיים &bull;</div>
-                </div>
-                <div className="bg-amber-600 px-10 py-3 rounded-full font-black uppercase text-sm shadow-lg">הפלג</div>
+        <div className="absolute inset-0 z-[200] bg-slate-900/95 overflow-y-auto text-white backdrop-blur-md">
+          <div className="min-h-full flex flex-col items-center justify-center p-6 pb-16 text-center">
+            <h1 className="text-4xl md:text-5xl font-black italic mb-1 text-amber-500 uppercase tracking-tighter">Pirate Captain</h1>
+            <p className="text-base md:text-xl opacity-70 mb-6 md:mb-8">בחר ספינה וצא לים הפתוח</p>
+            <div className="flex gap-4 md:gap-8 flex-wrap justify-center mb-8 md:mb-10">
+              {Object.entries(SHIP_TYPES).map(([id, ship]) => (
+                <button key={id} onClick={() => startSinglePlayer(id)} className="w-40 md:w-52 p-4 md:p-6 bg-white/5 border-2 border-white/20 rounded-2xl md:rounded-3xl hover:bg-white/10 hover:border-amber-500 transition-all active:scale-95 flex flex-col items-center">
+                  <ShipPreview typeId={id} />
+                  <div className="text-lg md:text-2xl font-bold mb-2 md:mb-3 text-amber-100">{ship.name}</div>
+                  <div className="text-xs md:text-sm opacity-60 mb-4 md:mb-6 text-right space-y-1">
+                    <div>{ship.cannons === 1 ? 'תותח בודד' : 'זוג תותחים'} &bull;</div>
+                    <div>{ship.health} חיים &bull;</div>
+                  </div>
+                  <div className="bg-amber-600 px-6 md:px-10 py-2 md:py-3 rounded-full font-black uppercase text-xs md:text-sm shadow-lg">הפלג</div>
+                </button>
+              ))}
+            </div>
+            <div className="border-t border-white/10 pt-6 md:pt-8 w-full max-w-lg">
+              <p className="text-base md:text-lg font-bold mb-4 text-amber-400">מרובה שחקנים</p>
+              <button onClick={() => setGameState('lobby')} className="px-8 py-3 bg-blue-600 rounded-full font-bold text-sm hover:bg-blue-500 active:scale-95 transition-all">
+                צור / הצטרף למשחק
               </button>
-            ))}
-          </div>
-          <div className="border-t border-white/10 pt-8 w-full max-w-lg">
-            <p className="text-lg font-bold mb-4 text-amber-400">מרובה שחקנים</p>
-            <button onClick={() => setGameState('lobby')} className="px-8 py-3 bg-blue-600 rounded-full font-bold text-sm hover:bg-blue-500 active:scale-95 transition-all">
-              צור / הצטרף למשחק
-            </button>
+            </div>
           </div>
         </div>
       )}
 
       {gameState === 'lobby' && (
-        <div className="absolute inset-0 z-[200] bg-slate-900/95 flex flex-col items-center justify-center p-6 text-center text-white backdrop-blur-md">
-          <h1 className="text-4xl font-black italic mb-8 text-amber-500 uppercase">מרובה שחקנים</h1>
-          {lobbyError && <div className="bg-red-600/80 px-6 py-2 rounded-xl mb-6 text-sm">{lobbyError}</div>}
-          <div className="flex gap-8 flex-wrap justify-center mb-8">
-            <div className="w-64 p-6 bg-white/5 border-2 border-white/20 rounded-3xl flex flex-col items-center gap-4">
-              <h2 className="text-xl font-bold text-amber-100">צור משחק</h2>
-              <button onClick={() => createRoom('coop')} className="w-full px-6 py-3 bg-green-600 rounded-full font-bold text-sm hover:bg-green-500 active:scale-95 transition-all">שיתופי (Co-op)</button>
-              <button onClick={() => createRoom('ffa')} className="w-full px-6 py-3 bg-red-600 rounded-full font-bold text-sm hover:bg-red-500 active:scale-95 transition-all">כל אחד לעצמו (FFA)</button>
+        <div className="absolute inset-0 z-[200] bg-slate-900/95 overflow-y-auto text-white backdrop-blur-md">
+          <div className="min-h-full flex flex-col items-center justify-center p-6 pb-16 text-center">
+            <h1 className="text-3xl md:text-4xl font-black italic mb-6 md:mb-8 text-amber-500 uppercase">מרובה שחקנים</h1>
+            {lobbyError && <div className="bg-red-600/80 px-6 py-2 rounded-xl mb-4 md:mb-6 text-sm">{lobbyError}</div>}
+            <div className="flex gap-4 md:gap-8 flex-col md:flex-row justify-center mb-6 md:mb-8 w-full max-w-lg">
+              <div className="flex-1 p-5 md:p-6 bg-white/5 border-2 border-white/20 rounded-2xl md:rounded-3xl flex flex-col items-center gap-3 md:gap-4">
+                <h2 className="text-lg md:text-xl font-bold text-amber-100">צור משחק</h2>
+                <button onClick={() => createRoom('coop')} className="w-full px-6 py-3 bg-green-600 rounded-full font-bold text-sm hover:bg-green-500 active:scale-95 transition-all">שיתופי (Co-op)</button>
+                <button onClick={() => createRoom('ffa')} className="w-full px-6 py-3 bg-red-600 rounded-full font-bold text-sm hover:bg-red-500 active:scale-95 transition-all">כל אחד לעצמו (FFA)</button>
+              </div>
+              <div className="flex-1 p-5 md:p-6 bg-white/5 border-2 border-white/20 rounded-2xl md:rounded-3xl flex flex-col items-center gap-3 md:gap-4">
+                <h2 className="text-lg md:text-xl font-bold text-amber-100">הצטרף למשחק</h2>
+                <input type="text" maxLength={6} placeholder="הכנס קוד" value={joinCode} onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
+                  className="w-full px-4 py-3 bg-black/40 border-2 border-white/20 rounded-xl text-center text-2xl font-mono tracking-[0.3em] placeholder:text-white/30 focus:border-amber-500 outline-none" />
+                <button onClick={joinRoom} className="w-full px-6 py-3 bg-blue-600 rounded-full font-bold text-sm hover:bg-blue-500 active:scale-95 transition-all">הצטרף</button>
+              </div>
             </div>
-            <div className="w-64 p-6 bg-white/5 border-2 border-white/20 rounded-3xl flex flex-col items-center gap-4">
-              <h2 className="text-xl font-bold text-amber-100">הצטרף למשחק</h2>
-              <input type="text" maxLength={6} placeholder="הכנס קוד" value={joinCode} onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
-                className="w-full px-4 py-3 bg-black/40 border-2 border-white/20 rounded-xl text-center text-2xl font-mono tracking-[0.3em] placeholder:text-white/30 focus:border-amber-500 outline-none" />
-              <button onClick={joinRoom} className="w-full px-6 py-3 bg-blue-600 rounded-full font-bold text-sm hover:bg-blue-500 active:scale-95 transition-all">הצטרף</button>
-            </div>
+            <button onClick={backToMenu} className="text-white/50 hover:text-white text-sm underline">חזרה לתפריט</button>
           </div>
-          <button onClick={backToMenu} className="text-white/50 hover:text-white text-sm underline">חזרה לתפריט</button>
         </div>
       )}
 
       {gameState === 'lobby-waiting' && (
-        <div className="absolute inset-0 z-[200] bg-slate-900/95 flex flex-col items-center justify-center p-6 text-center text-white backdrop-blur-md">
-          <h1 className="text-4xl font-black italic mb-2 text-amber-500 uppercase">
+        <div className="absolute inset-0 z-[200] bg-slate-900/95 overflow-y-auto text-white backdrop-blur-md">
+          <div className="min-h-full flex flex-col items-center justify-center p-6 pb-16 text-center">
+          <h1 className="text-3xl md:text-4xl font-black italic mb-2 text-amber-500 uppercase">
             {lobbyMode === 'coop' ? 'שיתופי' : 'כל אחד לעצמו'}
           </h1>
           {lobbyError && <div className="bg-red-600/80 px-6 py-2 rounded-xl mb-4 text-sm">{lobbyError}</div>}
@@ -662,6 +667,7 @@ const App = () => {
           {lobbyRole === 'host' && lobbyPlayers.length < 2 && <p className="text-white/40 text-sm mb-4">ממתין לשחקנים...</p>}
           {lobbyRole === 'guest' && <p className="text-white/40 text-sm mb-4">ממתין שהמארח יתחיל...</p>}
           <button onClick={backToMenu} className="text-white/50 hover:text-white text-sm underline">עזוב חדר</button>
+          </div>
         </div>
       )}
 
