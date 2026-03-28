@@ -468,37 +468,6 @@ const App = () => {
           if (enemies[i].sinkProgress >= 1) enemies.splice(i, 1);
         }
 
-        // Decorations
-        clouds.forEach((c) => {
-          c.x += Math.cos(wind.angle) * c.spd;
-          c.y += Math.sin(wind.angle) * c.spd;
-          if (c.x > WORLD.width + 200) c.x = -200; if (c.x < -200) c.x = WORLD.width + 200;
-          if (c.y > WORLD.height + 200) c.y = -200; if (c.y < -200) c.y = WORLD.height + 200;
-        });
-        seagulls.forEach((s) => {
-          s.x += Math.cos(s.a) * s.sp; s.y += Math.sin(s.a) * s.sp; s.w += 0.15;
-          if (s.x > WORLD.width) s.x = 0; if (s.x < 0) s.x = WORLD.width;
-          if (s.y > WORLD.height) s.y = 0; if (s.y < 0) s.y = WORLD.height;
-        });
-
-        // Sea life
-        if (Math.random() < 0.015 && seaLife.length < 50) {
-          const sx = Math.random() * WORLD.width, sy = Math.random() * WORLD.height;
-          if (!islands.some((isl) => isl.checkCollision(sx, sy, 70))) {
-            const l = new SeaLife(sx, sy, Math.random() > 0.85 ? 'whale' : 'dolphin');
-            seaLife.push(l);
-            if (l.type === 'dolphin') {
-              const flockSize = 3 + Math.floor(Math.random() * 6);
-              for (let j = 0; j < flockSize; j++)
-                seaLife.push(new SeaLife(sx + (Math.random() - 0.5) * 80, sy + (Math.random() - 0.5) * 80, 'dolphin', l));
-            }
-          }
-        }
-        for (let i = seaLife.length - 1; i >= 0; i--) {
-          seaLife[i].update(islands, particles);
-          if (seaLife[i].life <= 0) seaLife.splice(i, 1);
-        }
-
         // Cannonball collisions
         const allTargets = mode === 'ffa' ? [...allPlayerShips, ...enemies] : [player, ...playerShips, ...enemies];
         for (let i = cannonballs.length - 1; i >= 0; i--) {
@@ -519,12 +488,6 @@ const App = () => {
             }
           }
           if (!b.active) cannonballs.splice(i, 1);
-        }
-
-        // Particles
-        for (let i = particles.length - 1; i >= 0; i--) {
-          particles[i].update();
-          if (particles[i].life <= 0) particles.splice(i, 1);
         }
 
         // Game over check
@@ -553,6 +516,39 @@ const App = () => {
         }
       }
 
+      // === LOCAL UPDATES (run for both host and guest) ===
+      clouds.forEach((c) => {
+        c.x += Math.cos(wind.angle) * c.spd;
+        c.y += Math.sin(wind.angle) * c.spd;
+        if (c.x > WORLD.width + 200) c.x = -200; if (c.x < -200) c.x = WORLD.width + 200;
+        if (c.y > WORLD.height + 200) c.y = -200; if (c.y < -200) c.y = WORLD.height + 200;
+      });
+      seagulls.forEach((s) => {
+        s.x += Math.cos(s.a) * s.sp; s.y += Math.sin(s.a) * s.sp; s.w += 0.15;
+        if (s.x > WORLD.width) s.x = 0; if (s.x < 0) s.x = WORLD.width;
+        if (s.y > WORLD.height) s.y = 0; if (s.y < 0) s.y = WORLD.height;
+      });
+      if (Math.random() < 0.015 && seaLife.length < 50) {
+        const sx = Math.random() * WORLD.width, sy = Math.random() * WORLD.height;
+        if (!islands.some((isl) => isl.checkCollision(sx, sy, 70))) {
+          const l = new SeaLife(sx, sy, Math.random() > 0.85 ? 'whale' : 'dolphin');
+          seaLife.push(l);
+          if (l.type === 'dolphin') {
+            const flockSize = 3 + Math.floor(Math.random() * 6);
+            for (let j = 0; j < flockSize; j++)
+              seaLife.push(new SeaLife(sx + (Math.random() - 0.5) * 80, sy + (Math.random() - 0.5) * 80, 'dolphin', l));
+          }
+        }
+      }
+      for (let i = seaLife.length - 1; i >= 0; i--) {
+        seaLife[i].update(islands, particles);
+        if (seaLife[i].life <= 0) seaLife.splice(i, 1);
+      }
+      for (let i = particles.length - 1; i >= 0; i--) {
+        particles[i].update();
+        if (particles[i].life <= 0) particles.splice(i, 1);
+      }
+
       // === DRAW (same for host and guest) ===
       const allShips = [...(player ? [player] : []), ...playerShips];
 
@@ -566,7 +562,7 @@ const App = () => {
       ctx.fillRect(0, 0, WORLD.width, WORLD.height);
 
       islands.forEach((isl) => isl.draw(ctx));
-      if (!isGuest) seaLife.forEach((s) => s.draw(ctx));
+      seaLife.forEach((s) => s.draw(ctx));
       particles.forEach((p) => p.draw(ctx));
       enemies.forEach((e) => e.draw(ctx, false, 0, false, 0));
       // Draw other player ships
