@@ -850,7 +850,9 @@ const App = () => {
             <p className="text-[9px] opacity-40 font-mono mt-2">
               keys: {Object.keys(keys.current).filter(k => keys.current[k]).join(', ') || 'none'}<br/>
               spd: {entities.current.player?.speed?.toFixed(3) || '?'}<br/>
-              pos: {entities.current.player?.x?.toFixed(0) || '?'},{entities.current.player?.y?.toFixed(0) || '?'}
+              pos: {entities.current.player?.x?.toFixed(0) || '?'},{entities.current.player?.y?.toFixed(0) || '?'}<br/>
+              net: {networkState.current ? `${networkState.current.ships?.length} ships` : 'no state'}<br/>
+              role: {lobbyRole || 'single'} | conn: {connRef.current?.connected ? 'yes' : 'no'}
             </p>
           </div>
           <div className="absolute top-6 left-1/2 -translate-x-1/2 flex flex-col items-center pointer-events-none">
