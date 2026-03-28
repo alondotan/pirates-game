@@ -5,7 +5,7 @@ import { SeaLife } from './entities/SeaLife';
 import { Island } from './entities/Island';
 import { Ship } from './entities/Ship';
 import { Connection } from './multiplayer/connection';
-import { generateSeededIslands, lerp, lerpAngle } from './multiplayer/protocol';
+import { lerp, lerpAngle } from './multiplayer/protocol';
 
 const ShipPreview = ({ typeId }) => {
   const ref = useCallback((canvas) => {
@@ -179,20 +179,31 @@ const App = () => {
     conn.on('host_disconnected', () => { setLobbyError('המארח התנתק'); setGameState('menu'); });
     conn.on('_close', () => { if (gameStateRef.current !== 'menu') setLobbyError('החיבור לשרת נותק'); });
 
-    // Game started — server tells us seed + players so we can set up rendering
-    conn.on('game_started', (msg) => {
-      const islandsArr = generateSeededIslands(msg.seed, WORLD.width, WORLD.height);
-      local.current.islands = islandsArr;
+    // Game started — set up rendering (islands come from first state message)
+    conn.on('game_started', () => {
+      local.current.islands = [];
       local.current.ships = [];
       local.current.cannonballs = [];
-      initDecorations(islandsArr);
       networkState.current = null;
       setScore(0);
       setGameState('playing');
     });
 
     // State updates from authoritative server
-    conn.on('state', (msg) => { networkState.current = msg; });
+    conn.on('state', (msg) => {
+      networkState.current = msg;
+      // Build island rendering instances from server data on first state
+      if (msg.islands && local.current.islands.length === 0) {
+        local.current.islands = msg.islands.map((isl) => {
+          const island = new Island(isl.x, isl.y, isl.isFortress);
+          // Override generated circles/fort positions with server's exact values
+          island.circles = isl.circles;
+          if (isl.isFortress) { island.fortX = isl.fortX; island.fortY = isl.fortY; }
+          return island;
+        });
+        initDecorations(local.current.islands);
+      }
+    });
 
     conn.on('game_over', () => { setGameState('gameover'); });
   };
