@@ -306,7 +306,8 @@ const App = () => {
     const loop = () => {
       if (gameState !== 'playing') { frameId = requestAnimationFrame(loop); return; }
       const canvas = canvasRef.current;
-      if (!canvas) return;
+      if (!canvas) { frameId = requestAnimationFrame(loop); return; }
+      try {
       const ctx = canvas.getContext('2d');
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
@@ -623,6 +624,9 @@ const App = () => {
         wctx.restore();
       }
 
+      } catch (err) {
+        console.error('Game loop error:', err);
+      }
       frameId = requestAnimationFrame(loop);
     };
     frameId = requestAnimationFrame(loop);
