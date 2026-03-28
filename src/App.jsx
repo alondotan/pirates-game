@@ -785,7 +785,13 @@ const App = () => {
           {/* Room code */}
           <div className="mb-8">
             <p className="text-sm opacity-60 mb-2">קוד חדר</p>
-            <div className="text-5xl font-mono font-black tracking-[0.4em] text-amber-400">{roomCode}</div>
+            <div className="text-5xl font-mono font-black tracking-[0.4em] text-amber-400 select-text cursor-text">{roomCode}</div>
+            <button
+              onClick={() => { navigator.clipboard.writeText(roomCode); }}
+              className="mt-3 px-4 py-1.5 bg-white/10 rounded-lg text-xs text-white/60 hover:bg-white/20 hover:text-white transition-all active:scale-95"
+            >
+              העתק קוד
+            </button>
           </div>
 
           {/* Players list */}
