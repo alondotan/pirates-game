@@ -36,6 +36,7 @@ const App = () => {
   const [roomCode, setRoomCode] = useState('');
   const [joinCode, setJoinCode] = useState('');
   const [myPlayerId, setMyPlayerId] = useState(null);
+  const [disconnected, setDisconnected] = useState(false);
   const [lobbyPlayers, setLobbyPlayers] = useState([]);
   const [selectedShip, setSelectedShip] = useState('sloop');
   const [lobbyError, setLobbyError] = useState('');
@@ -177,7 +178,10 @@ const App = () => {
       setLobbyPlayers((prev) => prev.filter((p) => p.id !== msg.playerId));
     });
     conn.on('host_disconnected', () => { setLobbyError('המארח התנתק'); setGameState('menu'); });
-    conn.on('_close', () => { if (gameStateRef.current !== 'menu') setLobbyError('החיבור לשרת נותק'); });
+    conn.on('_close', () => {
+      if (gameStateRef.current === 'playing') setDisconnected(true);
+      else if (gameStateRef.current !== 'menu') { setLobbyError('החיבור לשרת נותק'); setGameState('menu'); }
+    });
 
     // Game started — set up rendering (islands come from first state message)
     conn.on('game_started', () => {
@@ -564,7 +568,7 @@ const App = () => {
   const backToMenu = () => {
     if (connRef.current) { connRef.current.disconnect(); connRef.current = null; }
     setLobbyRole(null); setLobbyMode(null); setRoomCode(''); setJoinCode('');
-    setLobbyPlayers([]); setLobbyError(''); setGameState('menu');
+    setLobbyPlayers([]); setLobbyError(''); setDisconnected(false); setGameState('menu');
   };
 
   return (
@@ -663,6 +667,12 @@ const App = () => {
 
       {gameState === 'playing' && (
         <>
+          {disconnected && (
+            <div className="absolute inset-0 z-[250] bg-black/80 flex flex-col items-center justify-center text-white backdrop-blur-sm">
+              <p className="text-2xl font-bold mb-4 text-red-400">החיבור לשרת נותק</p>
+              <button onClick={backToMenu} className="px-12 py-4 bg-amber-600 rounded-full font-black text-lg shadow-2xl active:scale-95 border-b-4 border-amber-800">חזור לתפריט</button>
+            </div>
+          )}
           <div className="absolute top-6 right-6 text-white text-right pointer-events-none drop-shadow-lg">
             <h1 className="text-xl font-black italic text-amber-500">PIRATE CAPTAIN</h1>
             <p className="text-lg font-bold">שלל: {score}</p>
