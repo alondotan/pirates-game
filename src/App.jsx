@@ -284,6 +284,11 @@ const App = () => {
               ship = new Ship(sd.x, sd.y, sd.typeId, sd.isPlayer, sd.id);
               ship.playerColor = sd.playerColor;
             }
+            // Detect hit — health dropped → impact particles
+            if (ship.health !== undefined && sd.health < ship.health) {
+              for (let p = 0; p < 5; p++) particles.push(new Particle(sd.x + (Math.random() - 0.5) * 20, sd.y + (Math.random() - 0.5) * 20, 'fire', 5, 25));
+              for (let p = 0; p < 8; p++) particles.push(new Particle(sd.x, sd.y, 'water', 2.5, 25));
+            }
             // Interpolation targets
             ship._prevX = ship.x; ship._prevY = ship.y; ship._prevAngle = ship.angle;
             ship._targetX = sd.x; ship._targetY = sd.y; ship._targetAngle = sd.angle;
