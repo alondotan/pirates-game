@@ -303,11 +303,14 @@ const App = () => {
   // === GAME LOOP ===
   useEffect(() => {
     let frameId;
+    let loopCount = 0;
     const loop = () => {
       if (gameState !== 'playing') { frameId = requestAnimationFrame(loop); return; }
       const canvas = canvasRef.current;
       if (!canvas) { frameId = requestAnimationFrame(loop); return; }
       try {
+      loopCount++;
+      if (loopCount <= 3) console.log('Game loop running, frame', loopCount, 'entities:', !!entities.current.player, 'enemies:', entities.current.enemies.length);
       const ctx = canvas.getContext('2d');
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
@@ -689,7 +692,7 @@ const App = () => {
   };
 
   return (
-    <div className="relative w-full h-screen bg-sky-900 overflow-hidden select-none touch-none" onTouchStart={onTS} onTouchMove={onTM} onTouchEnd={onTE}>
+    <div className={`relative w-full h-screen bg-sky-900 select-none ${gameState === 'playing' ? 'overflow-hidden touch-none' : 'overflow-y-auto'}`} onTouchStart={onTS} onTouchMove={onTM} onTouchEnd={onTE}>
       <canvas ref={canvasRef} className="block w-full h-full" />
 
       {/* === MAIN MENU === */}
