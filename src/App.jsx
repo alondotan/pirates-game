@@ -414,6 +414,19 @@ const App = () => {
         // Update local cannonball physics prediction
         cannonballs.forEach((cb) => cb.update());
 
+        // Generate sinking/damage particles locally for guest
+        const allVisible = [...(player ? [player] : []), ...playerShips, ...enemies];
+        for (const s of allVisible) {
+          if (s.isSinking) {
+            if (Math.random() > 0.4) particles.push(new Particle(s.x + (Math.random() - 0.5) * 40, s.y + (Math.random() - 0.5) * 40, 'fire', 4, 30));
+            if (Math.random() > 0.2) particles.push(new Particle(s.x + (Math.random() - 0.5) * 40, s.y + (Math.random() - 0.5) * 40, 'smoke', 5, 80, 0, -1.2));
+          } else if (s.health < s.maxHealth * 0.5 && Math.random() > 0.85) {
+            particles.push(new Particle(s.x, s.y, 'fire', 3, 20));
+          } else if (s.health < s.maxHealth * 0.95 && Math.random() > 0.85) {
+            particles.push(new Particle(s.x, s.y, 'smoke', 2, 40, 0, -0.6));
+          }
+        }
+
         // Check game over
         if (player && player.sinkProgress >= 0.9) {
           if (mode === 'coop') {
@@ -882,12 +895,6 @@ const App = () => {
             <span className="text-[8px] text-white font-bold opacity-60">רוח</span>
           </div>
           <canvas ref={mCanvasRef} width={100} height={100} className="absolute top-6 left-6 rounded-full border-2 border-white/20 bg-black/40" />
-          {!document.fullscreenElement && (
-            <button onClick={() => document.documentElement.requestFullscreen?.().catch(() => {})}
-              className="md:hidden absolute top-16 left-1/2 -translate-x-1/2 px-4 py-1.5 bg-black/60 rounded-full text-white text-xs border border-white/20 active:scale-95 z-10">
-              מסך מלא
-            </button>
-          )}
           <div className="hidden md:block absolute bottom-6 right-6 pointer-events-none text-white/40 text-[10px] leading-relaxed text-right">
             <div>חצים - הגה ומפרשים</div>
             <div>A / D - ירי שמאל / ימין</div>
