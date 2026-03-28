@@ -303,14 +303,11 @@ const App = () => {
   // === GAME LOOP ===
   useEffect(() => {
     let frameId;
-    let loopCount = 0;
     const loop = () => {
       if (gameState !== 'playing') { frameId = requestAnimationFrame(loop); return; }
       const canvas = canvasRef.current;
       if (!canvas) { frameId = requestAnimationFrame(loop); return; }
       try {
-      loopCount++;
-      if (loopCount <= 3) console.log('Game loop running, frame', loopCount, 'entities:', !!entities.current.player, 'enemies:', entities.current.enemies.length);
       const ctx = canvas.getContext('2d');
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
