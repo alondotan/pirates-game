@@ -676,17 +676,18 @@ const App = () => {
     if (gameStateRef.current !== 'playing') return;
     e.preventDefault();
     for (const t of e.changedTouches) {
-      if (t.clientX < window.innerWidth / 2) { input.current.joyTouchId = t.identifier; upJ(t); }
-      else {
-        const bL = document.getElementById('btnLZone')?.getBoundingClientRect();
-        const bR = document.getElementById('btnRZone')?.getBoundingClientRect();
-        if (bL && t.clientX >= bL.left && t.clientX <= bL.right && t.clientY >= bL.top && t.clientY <= bL.bottom) {
-          input.current.fireTouchIdL = t.identifier; input.current.isAimingL = true;
-          input.current.touchStartY_L = t.clientY; input.current.tempPowerStartL = input.current.aimPowerL;
-        } else if (bR && t.clientX >= bR.left && t.clientX <= bR.right && t.clientY >= bR.top && t.clientY <= bR.bottom) {
-          input.current.fireTouchIdR = t.identifier; input.current.isAimingR = true;
-          input.current.touchStartY_R = t.clientY; input.current.tempPowerStartR = input.current.aimPowerR;
-        }
+      const jB = document.getElementById('joyBase')?.getBoundingClientRect();
+      const bL = document.getElementById('btnLZone')?.getBoundingClientRect();
+      const bR = document.getElementById('btnRZone')?.getBoundingClientRect();
+      // Check if touch is near joystick area
+      if (jB && Math.hypot(t.clientX - (jB.left + jB.width / 2), t.clientY - (jB.top + jB.height / 2)) < 80) {
+        input.current.joyTouchId = t.identifier; upJ(t);
+      } else if (bL && t.clientX >= bL.left - 10 && t.clientX <= bL.right + 10 && t.clientY >= bL.top - 10 && t.clientY <= bL.bottom + 10) {
+        input.current.fireTouchIdL = t.identifier; input.current.isAimingL = true;
+        input.current.touchStartY_L = t.clientY; input.current.tempPowerStartL = input.current.aimPowerL;
+      } else if (bR && t.clientX >= bR.left - 10 && t.clientX <= bR.right + 10 && t.clientY >= bR.top - 10 && t.clientY <= bR.bottom + 10) {
+        input.current.fireTouchIdR = t.identifier; input.current.isAimingR = true;
+        input.current.touchStartY_R = t.clientY; input.current.tempPowerStartR = input.current.aimPowerR;
       }
     }
   };
@@ -881,12 +882,18 @@ const App = () => {
             <span className="text-[8px] text-white font-bold opacity-60">רוח</span>
           </div>
           <canvas ref={mCanvasRef} width={100} height={100} className="absolute top-6 left-6 rounded-full border-2 border-white/20 bg-black/40" />
+          {!document.fullscreenElement && (
+            <button onClick={() => document.documentElement.requestFullscreen?.().catch(() => {})}
+              className="md:hidden absolute top-16 left-1/2 -translate-x-1/2 px-4 py-1.5 bg-black/60 rounded-full text-white text-xs border border-white/20 active:scale-95 z-10">
+              מסך מלא
+            </button>
+          )}
           <div className="hidden md:block absolute bottom-6 right-6 pointer-events-none text-white/40 text-[10px] leading-relaxed text-right">
             <div>חצים - הגה ומפרשים</div>
             <div>A / D - ירי שמאל / ימין</div>
             <div>W / S - עוצמת ירי</div>
           </div>
-          <div className="absolute bottom-12 left-0 right-0 px-8 flex justify-between items-end pointer-events-none">
+          <div dir="ltr" className="absolute bottom-12 left-0 right-0 px-8 flex justify-between items-end pointer-events-none">
             <div id="joyBase" className="w-24 h-24 rounded-full bg-white/10 border-2 border-white/20 relative">
               <div className="w-10 h-10 rounded-full bg-white shadow-2xl absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" style={{ transform: `translate(calc(-50% + ${input.current.joyX * 35}px), calc(-50% + ${input.current.joyY * 35}px))` }} />
             </div>

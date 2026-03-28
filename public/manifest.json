@@ -1,0 +1,9 @@
+{
+  "name": "Pirate Captain",
+  "short_name": "Pirates",
+  "start_url": "/",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "background_color": "#0c4a6e",
+  "theme_color": "#0c4a6e"
+}
