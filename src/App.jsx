@@ -635,7 +635,8 @@ const App = () => {
 
   // --- Touch handlers ---
   const onTS = (e) => {
-    e.preventDefault(); if (gameState !== 'playing') return;
+    if (gameState !== 'playing') return;
+    e.preventDefault();
     for (const t of e.changedTouches) {
       if (t.clientX < window.innerWidth / 2) { input.current.joyTouchId = t.identifier; upJ(t); }
       else {
@@ -652,6 +653,7 @@ const App = () => {
     }
   };
   const onTM = (e) => {
+    if (gameState !== 'playing') return;
     e.preventDefault();
     for (const t of e.changedTouches) {
       if (t.identifier === input.current.joyTouchId) upJ(t);
