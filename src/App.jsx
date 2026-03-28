@@ -318,10 +318,23 @@ const App = () => {
   // === GAME LOOP ===
   useEffect(() => {
     let frameId;
+    let timerId;
+    const isMultiplayerHost = lobbyRole === 'host';
+
+    const scheduleNext = () => {
+      // In multiplayer host mode, use setTimeout so the loop keeps running in background tabs
+      // (requestAnimationFrame is paused by browsers when the tab is hidden)
+      if (isMultiplayerHost && document.hidden) {
+        timerId = setTimeout(loop, 16);
+      } else {
+        frameId = requestAnimationFrame(loop);
+      }
+    };
+
     const loop = () => {
-      if (gameState !== 'playing') { frameId = requestAnimationFrame(loop); return; }
+      if (gameState !== 'playing') { scheduleNext(); return; }
       const canvas = canvasRef.current;
-      if (!canvas) { frameId = requestAnimationFrame(loop); return; }
+      if (!canvas) { scheduleNext(); return; }
       try {
       const ctx = canvas.getContext('2d');
       canvas.width = window.innerWidth;
@@ -638,10 +651,10 @@ const App = () => {
       } catch (err) {
         console.error('Game loop error:', err);
       }
-      frameId = requestAnimationFrame(loop);
+      scheduleNext();
     };
-    frameId = requestAnimationFrame(loop);
-    return () => cancelAnimationFrame(frameId);
+    scheduleNext();
+    return () => { cancelAnimationFrame(frameId); clearTimeout(timerId); };
   }, [gameState, lobbyRole, myPlayerId]);
 
   // --- Touch handlers ---
