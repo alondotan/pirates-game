@@ -19,6 +19,7 @@ const ShipPreview = ({ typeId }) => {
 };
 
 const App = () => {
+  const containerRef = useRef(null);
   const canvasRef = useRef(null);
   const mCanvasRef = useRef(null);
   const windCanvasRef = useRef(null);
@@ -280,6 +281,20 @@ const App = () => {
   useEffect(() => {
     return () => { if (connRef.current) connRef.current.disconnect(); };
   }, []);
+
+  // Register touch handlers with { passive: false } to allow preventDefault
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    el.addEventListener('touchstart', onTS, { passive: false });
+    el.addEventListener('touchmove', onTM, { passive: false });
+    el.addEventListener('touchend', onTE);
+    return () => {
+      el.removeEventListener('touchstart', onTS);
+      el.removeEventListener('touchmove', onTM);
+      el.removeEventListener('touchend', onTE);
+    };
+  });
 
   // Keyboard controls
   useEffect(() => {
@@ -689,7 +704,7 @@ const App = () => {
   };
 
   return (
-    <div className={`relative w-full h-screen bg-sky-900 select-none ${gameState === 'playing' ? 'overflow-hidden touch-none' : 'overflow-y-auto'}`} onTouchStart={onTS} onTouchMove={onTM} onTouchEnd={onTE}>
+    <div ref={containerRef} className={`relative w-full h-screen bg-sky-900 select-none ${gameState === 'playing' ? 'overflow-hidden touch-none' : 'overflow-y-auto'}`}>
       <canvas ref={canvasRef} className="block w-full h-full" />
 
       {/* === MAIN MENU === */}
