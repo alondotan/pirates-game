@@ -25,6 +25,8 @@ const App = () => {
   const windCanvasRef = useRef(null);
   // gameState: 'menu' | 'lobby' | 'lobby-waiting' | 'playing' | 'gameover'
   const [gameState, setGameState] = useState('menu');
+  const gameStateRef = useRef(gameState);
+  gameStateRef.current = gameState;
   const [score, setScore] = useState(0);
   const [cooldowns, setCooldowns] = useState({ L: 0, R: 0 });
   const [powers, setPowers] = useState({ L: 5, R: 5 });
@@ -282,19 +284,22 @@ const App = () => {
     return () => { if (connRef.current) connRef.current.disconnect(); };
   }, []);
 
-  // Register touch handlers with { passive: false } to allow preventDefault
+  // Register touch handlers once with { passive: false } — stable wrappers delegate to ref
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
-    el.addEventListener('touchstart', onTS, { passive: false });
-    el.addEventListener('touchmove', onTM, { passive: false });
-    el.addEventListener('touchend', onTE);
+    const ts = (e) => touchHandlers.current.onTS(e);
+    const tm = (e) => touchHandlers.current.onTM(e);
+    const te = (e) => touchHandlers.current.onTE(e);
+    el.addEventListener('touchstart', ts, { passive: false });
+    el.addEventListener('touchmove', tm, { passive: false });
+    el.addEventListener('touchend', te);
     return () => {
-      el.removeEventListener('touchstart', onTS);
-      el.removeEventListener('touchmove', onTM);
-      el.removeEventListener('touchend', onTE);
+      el.removeEventListener('touchstart', ts);
+      el.removeEventListener('touchmove', tm);
+      el.removeEventListener('touchend', te);
     };
-  });
+  }, []);
 
   // Keyboard controls
   useEffect(() => {
@@ -657,9 +662,18 @@ const App = () => {
     return () => { cancelAnimationFrame(frameId); clearTimeout(timerId); };
   }, [gameState, lobbyRole, myPlayerId]);
 
-  // --- Touch handlers ---
-  const onTS = (e) => {
-    if (gameState !== 'playing') return;
+  // --- Touch handlers (stable refs, registered once) ---
+  const upJ = useCallback((t) => {
+    const jB = document.getElementById('joyBase')?.getBoundingClientRect();
+    if (!jB) return;
+    const dX = t.clientX - (jB.left + jB.width / 2), dY = t.clientY - (jB.top + jB.height / 2);
+    const d = Math.min(45, Math.hypot(dX, dY)), a = Math.atan2(dY, dX);
+    input.current.joyX = (Math.cos(a) * d) / 45; input.current.joyY = (Math.sin(a) * d) / 45;
+  }, []);
+
+  const touchHandlers = useRef({});
+  touchHandlers.current.onTS = (e) => {
+    if (gameStateRef.current !== 'playing') return;
     e.preventDefault();
     for (const t of e.changedTouches) {
       if (t.clientX < window.innerWidth / 2) { input.current.joyTouchId = t.identifier; upJ(t); }
@@ -676,8 +690,8 @@ const App = () => {
       }
     }
   };
-  const onTM = (e) => {
-    if (gameState !== 'playing') return;
+  touchHandlers.current.onTM = (e) => {
+    if (gameStateRef.current !== 'playing') return;
     e.preventDefault();
     for (const t of e.changedTouches) {
       if (t.identifier === input.current.joyTouchId) upJ(t);
@@ -685,19 +699,12 @@ const App = () => {
       else if (t.identifier === input.current.fireTouchIdR) input.current.aimPowerR = Math.max(1, Math.min(13, input.current.tempPowerStartR + (input.current.touchStartY_R - t.clientY) * AIM_SENSITIVITY));
     }
   };
-  const onTE = (e) => {
+  touchHandlers.current.onTE = (e) => {
     for (const t of e.changedTouches) {
       if (t.identifier === input.current.joyTouchId) { input.current.joyTouchId = null; input.current.joyX = 0; input.current.joyY = 0; }
       else if (t.identifier === input.current.fireTouchIdL) { input.current.finalPowerL = input.current.aimPowerL; input.current.queueFireL = true; input.current.isAimingL = false; input.current.fireTouchIdL = null; }
       else if (t.identifier === input.current.fireTouchIdR) { input.current.finalPowerR = input.current.aimPowerR; input.current.queueFireR = true; input.current.isAimingR = false; input.current.fireTouchIdR = null; }
     }
-  };
-  const upJ = (t) => {
-    const jB = document.getElementById('joyBase')?.getBoundingClientRect();
-    if (!jB) return;
-    const dX = t.clientX - (jB.left + jB.width / 2), dY = t.clientY - (jB.top + jB.height / 2);
-    const d = Math.min(45, Math.hypot(dX, dY)), a = Math.atan2(dY, dX);
-    input.current.joyX = (Math.cos(a) * d) / 45; input.current.joyY = (Math.sin(a) * d) / 45;
   };
 
   const backToMenu = () => {
